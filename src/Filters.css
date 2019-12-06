@@ -1,0 +1,18 @@
+.filters {
+    position: absolute;
+    z-index: 1;
+    top: 20%;
+    right: 0;
+    font-family: Helvetica, Arical, sans-serif;
+    line-height: 2;
+    margin: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    border: 4px solid whitesmoke;
+    display: flex;
+    color: #005265;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 3px 6px lightgrey;
+}

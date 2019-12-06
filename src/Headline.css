@@ -1,0 +1,9 @@
+.headline {
+    position: absolute;
+    z-index: 1;
+    font-family: Helvetica, Arical, sans-serif;
+    color: #005265;
+    display: flex;
+    text-align: center;
+    left: 30%;
+}
