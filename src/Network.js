@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
 import * as d3 from "d3";
-import $ from 'jquery';
 import "./InfoBox.css";
 import "./Network.css";
 import drawNet from "./Helper";

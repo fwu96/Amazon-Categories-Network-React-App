@@ -37,6 +37,7 @@ export default function drawNet(nodeSet, linkSet, currLayer, data, rootName) {
             }
         })
         .attr("fill", "#2E86C1")
+        .on("mouseover", mouseover)
         .on("click", function() {
             $(".infoBox").remove();
             d3.select(this)
@@ -54,6 +55,7 @@ export default function drawNet(nodeSet, linkSet, currLayer, data, rootName) {
             console.log("removed, ready to draw");
             drawNet(nodeSet, linkSet, layer, data, clickedData[0]["name"]);
         })
+        .on("mouseout", mouseout)
         .call(drag(simulation));
     node.append("title")
         .text(d => d.id);
@@ -119,4 +121,16 @@ function drag(simulation) {
         .on("start", dragStart)
         .on("drag", dragged)
         .on("end", dragEnd);
+}
+function mouseover() {
+    d3.select(this)
+        .transition()
+        .duration(700)
+        .attr("fill", "#AF7AC5");
+}
+function mouseout() {
+    d3.select(this)
+        .transition()
+        .duration(700)
+        .attr("fill", "#2E86C1");
 }
