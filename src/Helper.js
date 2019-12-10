@@ -1,9 +1,10 @@
 import * as d3 from 'd3';
 import $ from "jquery";
 
-export default function drawNet(nodeSet, linkSet, currLayer, data, rootName) {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+const width = window.innerWidth;
+const height = window.innerHeight;
+
+export function drawNet(nodeSet, linkSet, currLayer, data, rootName) {
     let simulation = d3.forceSimulation(nodeSet)
         .force("link", d3.forceLink(linkSet).id(d => d.id).strength(0))
         .force("link", d3.forceLink(linkSet).distance(d => d.value * 2))
@@ -122,6 +123,100 @@ function drag(simulation) {
         .on("drag", dragged)
         .on("end", dragEnd);
 }
+export function drawRadial(data) {
+    let barHeight = height / 2 - 40;
+    let formatNum = d3.format("s");
+    let color = d3.scaleOrdinal()
+        .range(["#8dd3c7","#ffffb3","#bebada","#fb8072","#80b1d3","#fdb462","#b3de69","#fccde5","#d9d9d9","#bc80bd","#ccebc5","#ffed6f"]);
+    let svg = d3.select("svg")
+        .attr("viewBox", [0, 0, width, height])
+        .append("g")
+        .attr("transform", "translate(" + width / 2 + ", " + height / 2 + ")");
+    data.sort((a, b) => b.value - a.value);
+    console.log(data);
+    let extent = d3.extent(data, d => d.value);
+    let barScale = d3.scaleLinear()
+        .domain(extent)
+        .range([100, barHeight]);
+    let keys = data.map(d => d.name);
+    let numBars = keys.length;
+    let x = d3.scaleLinear()
+        .domain(extent)
+        .range([0, -barHeight]);
+    let xAxis = d3.axisLeft()
+        .scale(x)
+        .ticks(3)
+        .tickFormat(formatNum);
+    let circles = svg.selectAll("circle")
+        .data(x.ticks(3))
+        .enter()
+        .append("circle")
+        .attr("r", d => barScale(d))
+        .style("fill", "none")
+        .style("stroke", "black")
+        .style("stroke-dasharray", "2.2")
+        .style("stroke-width", ".5px");
+    let arc = d3.arc()
+        .startAngle((d, i) => (i * 2 * Math.PI) / numBars)
+        .endAngle((d, i) => ((i + 1) * 2 * Math.PI) / numBars)
+        .innerRadius(0);
+    let segments = svg.selectAll("path")
+        .data(data)
+        .enter()
+        .append("path")
+        .each(d => d.outerRadius = 0)
+        .style("fill", d => color(d.name))
+        .attr("d", arc)
+        .on("mouseover", mouseover)
+        .on("mouseout", mouseout);
+    segments.transition()
+        .ease(d3.easeElastic)
+        .duration(1000)
+        .delay((d, i) => (25 - i) * 100)
+        .attrTween("d", (d, idx) => {
+            let i = d3.interpolate(d.outerRadius, barScale(+d.value));
+            return t => {
+                d.outerRadius = i(t);
+                return arc(d, idx);
+            };
+        });
+    svg.append("circle")
+        .attr("r", barHeight)
+        .classed("outer", true)
+        .style("fill", "none")
+        .style("stroke", "black")
+        .style("stroke-width", "1.5px");
+    let lines = svg.selectAll("line")
+        .data(keys)
+        .enter()
+        .append("line")
+        .attr("y2", -barHeight)
+        .style("stroke", "black")
+        .style("stroke-width", ".5px")
+        .attr("transform", (d, i) => "rotate(" + (i * 360 / numBars) + ")");
+    svg.append("g")
+        .classed("xAxis", true)
+        .call(xAxis);
+    let labelR = barHeight * 1.025;
+    let labels = svg.append("g")
+        .classed("labels", true);
+    labels.append("def")
+        .append("path")
+        .classed("label-path", true)
+        .attr("d", "m0" + -labelR + " a" + labelR + " " + labelR + " 0 1, 1 -0.01 0");
+    labels.selectAll("text")
+        .data(keys)
+        .enter()
+        .append("text")
+        .style("text-anchor", "middle")
+        .style("font-weight", "bold")
+        .style("fill", (d, i) => "#3E3E3E")
+        .append("textPath")
+        .attr("xlink:here", ".label-path")
+        .attr("startOffset", (d, i) => i * 100 / numBars + 50 / numBars + "%")
+        .text(d => d.toUpperCase());
+}
+
 function mouseover() {
     d3.select(this)
         .transition()
