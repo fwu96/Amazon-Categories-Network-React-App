@@ -123,21 +123,20 @@ function drag(simulation) {
         .on("drag", dragged)
         .on("end", dragEnd);
 }
-export function drawRadial(data) {
+export function drawRadial(originalData, data, currLayer) {
     let barHeight = height / 2 - 40;
-    let formatNum = d3.format("s");
     let color = d3.scaleOrdinal()
         .range(["#8dd3c7","#ffffb3","#bebada","#fb8072","#80b1d3","#fdb462","#b3de69","#fccde5","#d9d9d9","#bc80bd","#ccebc5","#ffed6f"]);
     let svg = d3.select("svg")
         .attr("viewBox", [0, 0, width, height])
         .append("g")
+        .classed("radial", true)
         .attr("transform", "translate(" + width / 2 + ", " + height / 2 + ")");
     data.sort((a, b) => b.value - a.value);
-    console.log(data);
     let extent = d3.extent(data, d => d.value);
     let barScale = d3.scaleLinear()
         .domain(extent)
-        .range([100, barHeight]);
+        .range([0, barHeight]);
     let keys = data.map(d => d.name);
     let numBars = keys.length;
     let x = d3.scaleLinear()
@@ -145,10 +144,9 @@ export function drawRadial(data) {
         .range([0, -barHeight]);
     let xAxis = d3.axisLeft()
         .scale(x)
-        .ticks(3)
-        .tickFormat(formatNum);
-    let circles = svg.selectAll("circle")
-        .data(x.ticks(3))
+        .ticks(7);
+    svg.selectAll("circle")
+        .data(x.ticks(7))
         .enter()
         .append("circle")
         .attr("r", d => barScale(d))
@@ -165,9 +163,20 @@ export function drawRadial(data) {
         .enter()
         .append("path")
         .each(d => d.outerRadius = 0)
-        .style("fill", d => color(d.name))
+        .attr("fill", d => color(d.name))
         .attr("d", arc)
         .on("mouseover", mouseover)
+        .on("click", function() {
+            $(".infoBox").remove();
+            d3.select(this)
+                .classed("clicked", !d3.select(this).classed("clicked"));
+            let clickedData = currLayer.filter(obj => obj.name === d3.select(this).select("title").text());
+            info(d3.select(this).classed("clicked"), clickedData[0]);
+            let layer = originalData.filter(obj => obj["parent"] === clickedData[0]["id"] || obj["name"] === clickedData[0]["name"]);
+            let subTreeSet = radialData(layer, clickedData[0]["name"]);
+            $(".radial").remove();
+            drawRadial(originalData, subTreeSet, layer);
+        })
         .on("mouseout", mouseout);
     segments.transition()
         .ease(d3.easeElastic)
@@ -186,7 +195,7 @@ export function drawRadial(data) {
         .style("fill", "none")
         .style("stroke", "black")
         .style("stroke-width", "1.5px");
-    let lines = svg.selectAll("line")
+    svg.selectAll("line")
         .data(keys)
         .enter()
         .append("line")
@@ -197,24 +206,17 @@ export function drawRadial(data) {
     svg.append("g")
         .classed("xAxis", true)
         .call(xAxis);
-    let labelR = barHeight * 1.025;
-    let labels = svg.append("g")
-        .classed("labels", true);
-    labels.append("def")
-        .append("path")
-        .classed("label-path", true)
-        .attr("d", "m0" + -labelR + " a" + labelR + " " + labelR + " 0 1, 1 -0.01 0");
-    labels.selectAll("text")
-        .data(keys)
-        .enter()
-        .append("text")
-        .style("text-anchor", "middle")
-        .style("font-weight", "bold")
-        .style("fill", (d, i) => "#3E3E3E")
-        .append("textPath")
-        .attr("xlink:here", ".label-path")
-        .attr("startOffset", (d, i) => i * 100 / numBars + 50 / numBars + "%")
-        .text(d => d.toUpperCase());
+    segments.append("title")
+        .text(d => d.name);
+}
+function radialData(data, rootName) {
+    let radSet = [];
+    data.forEach(obj => {
+        if (obj.name !== rootName) {
+            radSet.push({name: obj.name, value: +obj["numChildren"]});
+        }
+    });
+    return radSet;
 }
 
 function mouseover() {

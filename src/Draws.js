@@ -21,16 +21,16 @@ function netData(layer, rootName) {
     return netSet;
 }
 export function radialMode(data) {
-    let filteredData = data.filter(obj => +obj["parent"] === 0);
-    let defaultData = radialData(filteredData, "root");
+    let layer = data.filter(obj => +obj["parent"] === 0);
+    let defaultData = radialData(layer, "root");
     console.log(defaultData);
-    drawRadial(defaultData);
+    drawRadial(data, defaultData, layer);
 }
 function radialData(data, rootName) {
     let radSet = [];
     data.forEach(obj => {
         if (obj.name !== rootName) {
-            radSet.push({name: obj.name, value: +obj.numChildren});
+            radSet.push({name: obj.name, value: +obj["numChildren"]});
         }
     });
     return radSet;
