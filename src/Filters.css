@@ -1,8 +1,7 @@
 .filters {
     position: absolute;
     z-index: 1;
-    top: 20%;
-    right: 0;
+    top: 10%;
     font-family: Helvetica, Arical, sans-serif;
     line-height: 2;
     margin: 10px;
