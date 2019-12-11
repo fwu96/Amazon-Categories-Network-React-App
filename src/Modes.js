@@ -11,7 +11,6 @@ export function netMode(data, dt) {
 export function radialMode(data, dt) {
     let layer = data.filter(obj => +obj["parent"] === 0);
     let defaultData = radialData(layer, "root", dt);
-    console.log(defaultData);
     drawRadial(data, defaultData, layer, dt);
 }
 export function barMode(data, dt) {

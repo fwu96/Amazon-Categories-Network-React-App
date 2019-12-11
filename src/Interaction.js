@@ -22,6 +22,14 @@ export function restart() {
     $(".radial").remove();
     $(".bar").remove();
 }
+export function resetCatList() {
+    $(".categories").empty();
+}
+export function updateCatList(obj) {
+    $(".categories").append(
+            `<option value="${obj.name}">${obj.name}</option>`
+    );
+}
 export function mouseover() {
     d3.select(this)
         .transition()

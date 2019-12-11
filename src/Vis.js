@@ -11,7 +11,7 @@ const Vis = () => (
         </div>
         <div className="filters">
             <h5>Make a Selection of Category: </h5>
-            <select className="custom-select">
+            <select className="custom-select categories">
                 <option value="default">Choose a category</option>
             </select>
             <br/>

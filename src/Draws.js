@@ -59,14 +59,11 @@ export function drawNet(nodeSet, linkSet, currLayer, data, rootName, dt) {
             let clickedData = currLayer.filter(obj => obj.name === d3.select(this).select("title").text());
             info(d3.select(this).classed("clicked"), clickedData[0]);
             let layer = data.filter(obj => obj["parent"] === clickedData[0]["id"] || obj["name"] === clickedData[0]["name"]);
-            console.log(layer);
             let subTreeSet = netData(layer, clickedData[0]["name"], dt);
-            console.log(subTreeSet);
             let nodeSet = subTreeSet.node.map(d => Object.create(d)),
                 linkSet = subTreeSet.link.map(d => Object.create(d));
             $(".links").remove();
             $(".nodes").remove();
-            console.log("removed, ready to draw");
             drawNet(nodeSet, linkSet, layer, data, clickedData[0]["name"], dt);
         })
         .on("mouseout", mouseout)
@@ -82,6 +79,27 @@ export function drawNet(nodeSet, linkSet, currLayer, data, rootName, dt) {
         node
             .attr("cx", d => d.x)
             .attr("cy", d => d.y);
+    });
+    $(".categories").on("change", function() {
+        $(".infoBox").remove();
+        let root = $(this).val();
+        $(this).append(`<option value=${root}>${root}</option>`);
+        let chosen = data.filter(obj => obj.name === root);
+        if (chosen.length !== 0) {
+            info(true, chosen[0]);
+            let layer = data.filter(obj => obj["parent"] === chosen[0]["id"] || obj["name"] === chosen[0]["name"]);
+            let subTreeSet = netData(layer, chosen[0]["name"], dt);
+            let nodeSet = subTreeSet.node.map(d => Object.create(d));
+            let linkSet = subTreeSet.link.map(d => Object.create(d));
+            drawNet(nodeSet, linkSet, layer, data, chosen[0]["name"], dt);
+        } else {
+            let layer = data.filter(obj => +obj["parent"] === 0);
+            let defaultNet = netData(layer, "root", dt);
+            let defaultLinks = defaultNet.link.map(d => Object.create(d));
+            let defaultNodes = defaultNet.node.map(d => Object.create(d));
+            drawNet(defaultNodes, defaultLinks, layer, data, "root", dt);
+        }
+
     });
 }
 export function drawRadial(originalData, data, currLayer, dt) {
@@ -136,7 +154,6 @@ export function drawRadial(originalData, data, currLayer, dt) {
             info(d3.select(this).classed("clicked"), clickedData[0]);
             let layer = originalData.filter(obj => obj["parent"] === clickedData[0]["id"] || obj["name"] === clickedData[0]["name"]);
             let subTreeSet = radialData(layer, clickedData[0]["name"], dt);
-            $(".radial").remove();
             drawRadial(originalData, subTreeSet, layer, dt);
         })
         .on("mouseout", mouseout);
@@ -170,6 +187,23 @@ export function drawRadial(originalData, data, currLayer, dt) {
         .call(xAxis);
     segments.append("title")
         .text(d => d.name);
+    $(".categories").on("change", function() {
+        $(".infoBox").remove();
+        let root = $(this).val();
+        $(this).append(`<option value=${root}>${root}</option>`);
+        let chosen = originalData.filter(obj => obj.name === root);
+        if (chosen.length !== 0) {
+            info(true, chosen[0]);
+            let layer = originalData.filter(obj => obj["parent"] === chosen[0]["id"] || obj["name"] === chosen[0]["name"]);
+            let subTreeSet = radialData(layer, chosen[0]["name"], dt);
+            drawRadial(originalData, subTreeSet, layer, dt);
+        } else {
+            let layer = originalData.filter(obj => +obj["parent"] === 0);
+            let defaultData = radialData(layer, "root", dt);
+            drawRadial(originalData, defaultData, layer, dt);
+        }
+
+    });
 }
 export function drawBar(originalData, data, currLayer, dt) {
     restart();
@@ -214,7 +248,6 @@ export function drawBar(originalData, data, currLayer, dt) {
             info(d3.select(this).classed("clicked"), clickedData[0]);
             let layer = originalData.filter(obj => obj["parent"] === clickedData[0]["id"] || obj["name"] === clickedData[0]["name"]);
             let subTreeSet = barData(layer, clickedData[0]["name"], dt);
-            $(".bar").remove();
             drawBar(originalData, subTreeSet, layer, dt);
         })
         .on("mouseout", mouseout);
@@ -227,4 +260,21 @@ export function drawBar(originalData, data, currLayer, dt) {
     svg.selectAll("rect")
         .append("title")
         .text(d => d.name);
+    $(".categories").on("change", function() {
+        $(".infoBox").remove();
+        let root = $(this).val();
+        $(this).append(`<option value=${root}>${root}</option>`);
+        let chosen = originalData.filter(obj => obj.name === root);
+        if (chosen.length === 0) {
+            let layer = originalData.filter(obj => +obj["parent"] === 0);
+            let defaultData = barData(layer, "root", dt);
+            drawBar(originalData, defaultData, layer, dt);
+        } else {
+            info(true, chosen[0]);
+            let layer = originalData.filter(obj => obj["parent"] === chosen[0]["id"] || obj["name"] === chosen[0]["name"]);
+            let subTreeSet = barData(layer, chosen[0]["name"], dt);
+            drawBar(originalData, subTreeSet, layer, dt);
+        }
+
+    });
 }
