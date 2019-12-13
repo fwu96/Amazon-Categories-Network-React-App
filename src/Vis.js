@@ -10,11 +10,6 @@ const Vis = () => (
             <h1>Network of Amazon Products Categories</h1>
         </div>
         <div className="filters">
-            <h5>Make a Selection of Category: </h5>
-            <select className="custom-select categories">
-                <option value="default">Choose a category</option>
-            </select>
-            <br/>
             <h5>Make a Selection of Display Type: </h5>
             <select className="custom-select-sm disType">
                 <option value="default">Choose a display</option>
@@ -28,6 +23,11 @@ const Vis = () => (
                 <option value="default">Choose a type</option>
                 <option value="subCat">Number of Sub-Categories</option>
                 <option value="numPro">Number of Products</option>
+            </select>
+            <br/>
+            <h5>Make a Selection of Category: </h5>
+            <select className="custom-select categories">
+                <option value="default">Choose a category</option>
             </select>
         </div>
         <Network/>
